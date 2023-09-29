@@ -36,7 +36,7 @@ const deletePhoto = async (req, res) => {
   const { id } = req.params;
 
   const reqUser = req.user;
-  
+
   try {
     const photo = await Photo.findById(new mongoose.Types.ObjectId(id));
 
@@ -67,7 +67,17 @@ const deletePhoto = async (req, res) => {
   }
 };
 
+// Get all photos
+const getAllPhotos = async (req, res) => {
+  const photos = await Photo.find({})
+    .sort([["createdAt", -1]])
+    .exec();
+
+  return res.status(200).json(photos);
+};
+
 module.exports = {
   insertPhoto,
   deletePhoto,
+  getAllPhotos,
 };
