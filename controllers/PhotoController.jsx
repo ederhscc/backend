@@ -171,19 +171,58 @@ const likePhoto = async (req, res) => {
     // Put user id in likes array
     photo.likes.push(reqUser._id);
 
-    photo.save();
+    await photo.save();
 
-    res
-      .status(200)
-      .json({
-        photoId: id,
-        userId: reqUser._id,
-        message: "A foto foi curtida!",
-      });
+    res.status(200).json({
+      photoId: id,
+      userId: reqUser._id,
+      message: "A foto foi curtida!",
+    });
   } catch (error) {
     res.status(404).json({
       errors: ["Foto não encontrada."],
     });
+    return;
+  }
+};
+
+// Comment functonality
+const commentPhoto = async (req, res) => {
+  const { id } = req.params;
+  const { comment } = req.body;
+
+  const reqUser = req.user;
+
+  try {
+    const user = await User.findById(reqUser._id);
+
+    const photo = await Photo.findById(id);
+
+    // Check if photo exists
+    if (!photo) {
+      res.status(404).json({ errors: ["Foto não encontrada."] });
+      return;
+    }
+
+    // Put comment in the array comments
+    const userComment = {
+      comment,
+      userName: user.name,
+      userImage: user.profileImage,
+      userId: user._id,
+    };
+
+    // Put comments in comments array
+    photo.comments.push(userComment);
+
+    await photo.save();
+
+    res.status(200).json({
+      comment: userComment,
+      message: "O comentário foi adicionado com sucesso!",
+    });
+  } catch (error) {
+    res.status(404).json({ errors: ["Foto não encontrada!"] });
     return;
   }
 };
@@ -196,4 +235,5 @@ module.exports = {
   getPhotoById,
   updatePhoto,
   likePhoto,
+  commentPhoto,
 };
